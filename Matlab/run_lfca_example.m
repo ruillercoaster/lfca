@@ -1,10 +1,28 @@
-load('/export/data1/rccheng/ERSSTv5/ERSST_1900_2016.mat','LON_AXIS','LAT_AXIS','SST')
-time = 1900:1/12:2016.99;
+addpath(genpath(pwd))
+er_sst = ncread('/export/data1/rccheng/ERSST/sst.mnmean.v3.nc','sst'); % the dimension of matrix is reversed from python
+er_sst(er_sst<-9e30) = NaN;
+LON_AXIS = ncread('/export/data1/rccheng/ERSST/sst.mnmean.v3.nc','lon');
+LAT_AXIS = ncread('/export/data1/rccheng/ERSST/sst.mnmean.v3.nc','lat');
+time_ = ncread('/export/data1/rccheng/ERSST/sst.mnmean.v3.nc','time');
+
+start_ref = days(days(time_) + datetime(1800,1,1) - datetime(1900,1,1));
+end_ref = days(days(time_) + datetime(1800,1,1) - datetime(2019,12,1));
+
+start_ind = find(~start_ref);
+end_ind = find(~end_ref);
+
+SST = er_sst(:,:,start_ind:end_ind);
+% time = days(time_(start_ind)) + datetime(1800,1,1):calmonths(1):days(time_(end_ind)) + datetime(1800,1,1);
+time_start = year(days(time_(start_ind)) + datetime(1800,1,1));
+time_end = year(days(time_(end_ind)) + datetime(1800,1,1));
+% load('/export/data1/rccheng/ERSSTv5/ERSST_1900_2016.mat','LON_AXIS','LAT_AXIS','SST')
+time = time_start:1/12:time_end+0.99;
+time = time(1:size(SST,3));
 
 %% Parameters
 cutoff = 120; % number of timesteps (months in this case)
-truncation = 3; % number of EOFs
-%truncation = 30; % number of EOFs
+% truncation = 3; % number of EOFs
+truncation = 30; % number of EOFs
 
 % also try truncation = 3
 
@@ -64,11 +82,21 @@ if truncation < 5
 else
     ctrs = linspace(-0.6,0.6,25);
 end
+
+writematrix(LFCs,sprintf('~/Documents/stormtrack/indices/LFCs-%d-%d%d.csv',truncation,time_start,time_end))
+
+
 plot_patterns(LFCs,LFPs,1,time,LON_AXIS,LAT_AXIS,ctrs,'Pacific');
 plot_patterns(LFCs,LFPs,2,time,LON_AXIS,LAT_AXIS,ctrs,'Pacific');
-saveas(gcf,'./example-matlab-3.png')
+if truncation <5
+    
+ 	saveas(gcf,'./nc-matlab-3.png')
+end
+
 plot_patterns(LFCs,LFPs,3,time,LON_AXIS,LAT_AXIS,ctrs,'Pacific');
+
 if truncation > 3
     plot_patterns(LFCs,LFPs,4,time,LON_AXIS,LAT_AXIS,ctrs,'Pacific');
+ 	saveas(gcf,'./nc-matlab-30.png')
 end
 
