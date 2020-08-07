@@ -1,4 +1,4 @@
-load('ERSST_1900_2016.mat','LON_AXIS','LAT_AXIS','SST')
+load('/export/data1/rccheng/ERSSTv5/ERSST_1900_2016.mat','LON_AXIS','LAT_AXIS','SST')
 time = 1900:1/12:2016.99;
 
 %% Parameters
@@ -55,7 +55,8 @@ scale    = sqrt(normvec);
 LFPs       = insert_cols(LFPs, icol_ret, icol_disc);
 EOFs       = insert_cols(EOFs, icol_ret, icol_disc);
 weightsf        = insert_rows(weights, icol_ret, icol_disc);
-
+disp('LFCs')
+disp(LFCs(:,4))
 %% plot results
 if truncation < 5
     ctrs = linspace(-1,1,21);
@@ -68,3 +69,5 @@ plot_patterns(LFCs,LFPs,3,time,LON_AXIS,LAT_AXIS,ctrs,'Pacific');
 if truncation > 3
     plot_patterns(LFCs,LFPs,4,time,LON_AXIS,LAT_AXIS,ctrs,'Pacific');
 end
+
+saveas(gcf,'./example-matlab.png')

@@ -16,31 +16,31 @@ from matplotlib import pyplot as plt
 
 from netCDF4 import Dataset,num2date
 from datetime import datetime, timedelta
-
-# with Dataset('/export/data1/rccheng/ERSSTv5/sst.mnmean.nc') as f:
-#     lat_axis = f['lat'][:]
-#     lon_axis = f['lon'][:]
-#     er_time = f['time'][:]
-#     er_sst = f['sst'][:]
-# er_sst[er_sst<-9e36] = np.nan
-# er_refstart = [(datetime(1800,1,1) + timedelta(days= i)-datetime(1900,1,1)).days for i in er_time]
-# er_refend = [(datetime(1800,1,1) + timedelta(days= i)-datetime(2017,1,1)).days for i in er_time]
-# sst = er_sst[er_refstart.index(0):er_refend.index(0),:,:].transpose([2,1,0])
-# time = np.arange(1900,2016.99,1/12.)
-# nlon = sst.shape[0]
-# nlat = sst.shape[1]
-# ntime = sst.shape[2]
-
-filename = '/export/data1/rccheng/ERSSTv5/ERSST_1900_2016.mat'
-mat = io.loadmat(filename)
-
-lat_axis = mat['LAT_AXIS']
-lon_axis = mat['LON_AXIS']
-sst = mat['SST']
+import csv 
+with Dataset('/export/data1/rccheng/ERSSTv5/sst.mnmean.nc') as f:
+    lat_axis = f['lat'][:]
+    lon_axis = f['lon'][:]
+    er_time = f['time'][:]
+    er_sst = f['sst'][:]
+er_sst[er_sst<-9e36] = np.nan
+er_refstart = [(datetime(1800,1,1) + timedelta(days= i)-datetime(1900,1,1)).days for i in er_time]
+er_refend = [(datetime(1800,1,1) + timedelta(days= i)-datetime(2020,7,1)).days for i in er_time]
+sst = er_sst[er_refstart.index(0):er_refend.index(0)+1,:,:].transpose([2,1,0])
+time = np.arange(1900,2020.99,1/12.)[:-5]
 nlon = sst.shape[0]
 nlat = sst.shape[1]
 ntime = sst.shape[2]
-time = np.arange(1900,2016.99,1/12.)
+
+# filename = '/export/data1/rccheng/ERSSTv5/ERSST_1900_2016.mat'
+# mat = io.loadmat(filename)
+
+# lat_axis = mat['LAT_AXIS']
+# lon_axis = mat['LON_AXIS']
+# sst = mat['SST']
+# nlon = sst.shape[0]
+# nlat = sst.shape[1]
+# ntime = sst.shape[2]
+# time = np.arange(1900,2016.99,1/12.)
 
 cutoff = 120
 truncation = 30
@@ -103,13 +103,13 @@ pattern[np.where(np.abs(pattern)>1.e5)] = np.nan
 plt.figure()
 plt.contourf(np.squeeze(lon_axis),np.squeeze(lat_axis),np.transpose(pattern),\
              np.arange(-1,1.1,0.1),cmap=plt.cm.RdYlBu_r)
-plt.savefig('./example-lfp-1900-2016.png')
+plt.savefig('./nc-lfp-1900-2016.png')
 plt.figure()
 plt.bar(time,lfcs[:,i])
-plt.savefig('./example-lfc-1900-2016.png')
+plt.savefig('./nc-lfc-1900-2016.png')
 
-
-with open('/home/rccheng/Documents/stormtrack/indices/example-LFC-PDO-30-1900-2016.txt','w') as csvfile:
+output = np.concatenate([lfcs[:,i],np.array([np.nan,np.nan,np.nan,np.nan,np.nan])])
+with open('/home/rccheng/Documents/stormtrack/indices/LFC-PDO-30-1900-2020.txt','w') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=',')
-    spamwriter.writerow(lfcs[:,i])
-
+    spamwriter.writerow(output)
+    

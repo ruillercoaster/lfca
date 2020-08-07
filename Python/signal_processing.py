@@ -62,7 +62,7 @@ def lfca(x, cutoff, truncation, scale, **kwargs):
         tmp1 = np.concatenate((np.flipud(tmp),tmp,np.flipud(tmp)))
         #tmp_filt = filtfilt(b,a,tmp)
         tmp_filt = lanczos_filter(tmp1,1,1./cutoff)[0]
-        x_f[:,i] = tmp_filt[np.size(tmp_filt)/3:2*np.size(tmp_filt)/3]+p[0]*t+p[1]
+        x_f[:,i] = tmp_filt[int(np.size(tmp_filt)/3):int(2*np.size(tmp_filt)/3)]+p[0]*t+p[1]
         #x_f[:,i] = tmp_filt+p[0]*t+p[1]
         
     # whiten variables
